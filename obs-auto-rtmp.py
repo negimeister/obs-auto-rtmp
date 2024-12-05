@@ -29,10 +29,10 @@ def get_active_streams():
         return streams
     except requests.RequestException as e:
         print(f"Error fetching RTMP streams: {e}")
-        return []
+        return None
     except ET.ParseError as e:
         print(f"Error parsing RTMP XML response: {e}")
-        return []
+        return None
 
 def add_vlc_source(client, scene, stream):
     """Add a VLC source to a scene for the given stream."""
@@ -58,6 +58,7 @@ def add_vlc_source(client, scene, stream):
         print(f"Added VLC source '{source_name}' to scene '{scene}'")
     except Exception as e:
         print(f"Failed to add VLC source '{source_name}' to scene '{scene}': {e}")
+        client.remove_scene(scene)
 
 def add_ffmpeg_source(client, scene, stream):
     """Add an FFmpeg source to a scene for the given stream."""
@@ -78,35 +79,35 @@ def add_ffmpeg_source(client, scene, stream):
         print(f"Added FFmpeg source '{source_name}' to scene '{scene}'")
     except Exception as e:
         print(f"Failed to add FFmpeg source '{source_name}' to scene '{scene}': {e}")
+        client.remove_scene(scene)
 
 
 
 
-def manage_scenes(client, active_streams, existing_scenes):
+def manage_scenes(client, active_streams):
     """Create or remove scenes in OBS based on active RTMP streams."""
+    existing_scenes = set(scene["sceneName"] for scene in resp.scenes)
     for stream in active_streams:
         scene_name = f"{SCENE_PREFIX}{stream}"
         if scene_name not in existing_scenes:
             print(f"Creating scene for stream: {stream}")
             client.create_scene(scene_name)
-            existing_scenes.add(scene_name)
             add_ffmpeg_source(client, scene_name, stream) 
 
     for scene in list(existing_scenes):
         if scene.startswith(SCENE_PREFIX) and scene[len(SCENE_PREFIX):] not in active_streams:
             print(f"Removing scene for stream: {scene}")
             client.remove_scene(scene)
-            existing_scenes.remove(scene)
 
 def main():
     with obs.ReqClient(host=OBS_HOST, port=OBS_PORT, password=OBS_PASSWORD) as client:
         # Fetch existing scenes
         resp = client.get_scene_list()
-        existing_scenes = set(scene["sceneName"] for scene in resp.scenes)
 
         while True:
             active_streams = get_active_streams()
-            manage_scenes(client, active_streams, existing_scenes)
+            if active_streams is not None:
+                manage_scenes(client, active_streams)
             time.sleep(CHECK_INTERVAL)
 
 if __name__ == "__main__":
