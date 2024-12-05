@@ -86,7 +86,7 @@ def add_ffmpeg_source(client, scene, stream):
 
 def manage_scenes(client, active_streams):
     """Create or remove scenes in OBS based on active RTMP streams."""
-    existing_scenes = set(scene["sceneName"] for scene in resp.scenes)
+    existing_scenes = set(scene["sceneName"] for scene in client.get_scene_list().scenes)
     for stream in active_streams:
         scene_name = f"{SCENE_PREFIX}{stream}"
         if scene_name not in existing_scenes:
@@ -102,8 +102,6 @@ def manage_scenes(client, active_streams):
 def main():
     with obs.ReqClient(host=OBS_HOST, port=OBS_PORT, password=OBS_PASSWORD) as client:
         # Fetch existing scenes
-        resp = client.get_scene_list()
-
         while True:
             active_streams = get_active_streams()
             if active_streams is not None:
