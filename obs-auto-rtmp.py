@@ -55,6 +55,7 @@ def add_vlc_source(client, scene, stream):
             inputSettings=source_settings,
             sceneItemEnabled=True
         )
+        client.set_input_audio_monitor_type(source_name, "OBS_MONITORING_TYPE_MONITOR_AND_OUTPUT")
         print(f"Added VLC source '{source_name}' to scene '{scene}'")
     except Exception as e:
         print(f"Failed to add VLC source '{source_name}' to scene '{scene}': {e}")
@@ -74,8 +75,10 @@ def add_ffmpeg_source(client, scene, stream):
             inputName=source_name,
             inputKind="ffmpeg_source",
             inputSettings=source_settings,
-            sceneItemEnabled=True
+            sceneItemEnabled=True,
+
         )
+        client.set_input_audio_monitor_type(source_name, "OBS_MONITORING_TYPE_MONITOR_AND_OUTPUT")
         print(f"Added FFmpeg source '{source_name}' to scene '{scene}'")
     except Exception as e:
         print(f"Failed to add FFmpeg source '{source_name}' to scene '{scene}': {e}")
