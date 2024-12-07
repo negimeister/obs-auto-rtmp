@@ -67,7 +67,8 @@ def add_ffmpeg_source(client, scene, stream):
     source_settings = {
         "input": f"{STREAM_BASE_URL}/{stream}",
         "is_local_file": False,
-        "restart_on_activate": False
+        "restart_on_activate": False,
+         "buffering_mb": 6
     }
     try:
         client.create_input(
