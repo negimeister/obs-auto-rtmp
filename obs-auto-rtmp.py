@@ -15,6 +15,7 @@ SCENE_PREFIX = os.getenv("SCENE_PREFIX", "stream_")  # Default prefix for scenes
 
 def get_active_streams():
     """Fetch active RTMP streams from the NGINX RTMP status."""
+    print("Fetching active RTMP streams...")
     try:
         response = requests.get(NGINX_RTMP_STATUS_URL)
         response.raise_for_status()
@@ -26,6 +27,7 @@ def get_active_streams():
             stream_name = stream.find("name").text
             if stream_name:
                 streams.append(stream_name)
+        print(f"Active streams: {streams}")
         return streams
     except requests.RequestException as e:
         print(f"Error fetching RTMP streams: {e}")
@@ -63,6 +65,7 @@ def add_vlc_source(client, scene, stream):
 
 def add_ffmpeg_source(client, scene, stream):
     """Add an FFmpeg source to a scene for the given stream."""
+    print(f"Adding FFmpeg source for stream: {stream}")
     source_name = f"FFmpeg_{stream}"
     source_settings = {
         "input": f"{STREAM_BASE_URL}/{stream}",
